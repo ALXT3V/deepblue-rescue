@@ -24,7 +24,7 @@ public class MedicalRecord {
     @Column(name = "initial_weight", precision = 6, scale = 2)
     private BigDecimal initialWeight;
 
-    @Column(name = "initial_condition", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "initial_condition", columnDefinition = "TEXT")
     private String initialCondition;
 
     @Column(name = "injuries", columnDefinition = "TEXT")
@@ -36,7 +36,6 @@ public class MedicalRecord {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(
         name = "animal_id",
-        nullable = false,
         unique = true
     )
     private Animal animal;
@@ -51,11 +50,27 @@ public class MedicalRecord {
         this.observations = observations;
     }
 
+    public MedicalRecord(Double initialWeight, String initialCondition, String injuries, String observations) {
+        this.initialWeight = initialWeight != null ? BigDecimal.valueOf(initialWeight) : null;
+        this.initialCondition = initialCondition;
+        this.injuries = injuries;
+        this.observations = observations;
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public BigDecimal getInitialWeight() { return initialWeight; }
-    public void setInitialWeight(BigDecimal initialWeight) { this.initialWeight = initialWeight; }
+    public Object getInitialWeight() {
+        return initialWeight != null ? initialWeight.doubleValue() : null;
+    }
+
+    public void setInitialWeight(BigDecimal initialWeight) { 
+        this.initialWeight = initialWeight; 
+    }
+
+    public void setInitialWeight(Double initialWeight) { 
+        this.initialWeight = initialWeight != null ? BigDecimal.valueOf(initialWeight) : null; 
+    }
 
     public String getInitialCondition() { return initialCondition; }
     public void setInitialCondition(String initialCondition) { this.initialCondition = initialCondition; }

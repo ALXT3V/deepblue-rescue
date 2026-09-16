@@ -1,7 +1,9 @@
-package com;
+package com.deepblue.rescue;
+
 
 import java.math.BigDecimal;
 import org.springframework.jdbc.core.JdbcTemplate;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -9,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Import;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
@@ -32,9 +35,15 @@ import jakarta.transaction.Transactional;
 import com.deepblue.rescue.domain.TreatmentType;
 
 @Testcontainers
-@SpringBootTest
 @Transactional
+@SpringBootTest (classes=DeepblueRescueApplication.class)
+
+@Import(TestcontainersConfiguration.class)
 public class PersistenceIntegrationTest {
+    @Test
+    void contextLoads(){
+
+    }
     @Container
     @ServiceConnection
     static final PostgreSQLContainer postgres =
@@ -158,7 +167,7 @@ public class PersistenceIntegrationTest {
         animal.setAnimalCode("AN-2026-002");
 
         MedicalRecord record = new MedicalRecord();
-        record.setInitialWeight(new BigDecimal("28.40"));
+        record.setInitialWeight(new BigDecimal("28.4"));
         record.setInitialCondition("STABLE");
         record.setInjuries("Left front flipper injury");
 

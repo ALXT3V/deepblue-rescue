@@ -25,22 +25,19 @@ public class Animal {
     @Column(name = "animal_code", nullable = false, unique = true, length = 50)
     private String animalCode;
 
-    @Column(name = "common_name", nullable = false, length = 150)
-    private String commonName;
 
-    @Column(name = "scientific_name", nullable = false, length = 200)
+    @Column(name = "scientific_name",length = 200)
     private String scientificName;
 
     @Column(name = "sex", length = 10)
     private String sex;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-        name = "rescue_case_id",
-        nullable = false,
-        unique = true
-    )
-    private RescueCase rescueCase;
+    @Column(name = "common_name", nullable = true, length = 150)
+private String commonName;
+
+@OneToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "rescue_case_id", nullable = true)
+private RescueCase rescueCase;
 
     @OneToMany(mappedBy = "animal")
 private List<Treatment> treatments;
