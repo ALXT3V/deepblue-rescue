@@ -2,6 +2,9 @@ package com.deepblue.rescue;
 
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
@@ -26,6 +29,7 @@ import com.deepblue.rescue.domain.Specialist;
 import com.deepblue.rescue.domain.Treatment;
 import com.deepblue.rescue.repository.AnimalRepository;
 import com.deepblue.rescue.repository.ExpertiseRepository;
+import com.deepblue.rescue.repository.MedicalRecordRepository;
 import com.deepblue.rescue.repository.RescueCaseRepository;
 import com.deepblue.rescue.repository.RescueCenterRepository;
 import com.deepblue.rescue.repository.SpecialistRepository;
@@ -59,6 +63,10 @@ public class PersistenceIntegrationTest {
 
     @Autowired
     private AnimalRepository animalRepository;
+
+
+    @Autowired
+private MedicalRecordRepository medicalRecordRepository;
 
     @Autowired
     private SpecialistRepository specialistRepository;
@@ -525,7 +533,48 @@ public class PersistenceIntegrationTest {
             )
         );
     }
+@Test
+void testRetoIntegradorYRetoSinGuia() {
+    RescueCenter center = new RescueCenter("DB-CAR", "DeepBlue Caribbean", "Santa Marta");
+    rescueCenterRepository.save(center);
 
+    RescueCase rescueCase = new RescueCase("RES-2026-100", LocalDate.of(2026, 8, 18), "Bahía Concha", RescueStatus.IN_REHABILITATION);
+    rescueCase.setRescueCenter(center);
+    rescueCaseRepository.save(rescueCase);
+
+    Animal animal = new Animal("AN-2026-100", "Green Sea Turtle", "Chelonia mydas", "FEMALE");
+    animal.setRescueCase(rescueCase);
+    animalRepository.save(animal);
+
+    MedicalRecord record = new MedicalRecord(new BigDecimal("27.80"), "STABLE", "Injury caused by fishing net", "Possible plastic ingestion");
+    record.setAnimal(animal);
+    medicalRecordRepository.save(record);
+
+    Specialist specialist = new Specialist("SPEC-001", "Elena", "Vargas", "elena@deepblue.org",true);
+
+    Expertise exp1 = expertiseRepository.findByNameIgnoreCase("Marine Reptiles").orElseGet(() -> expertiseRepository.save(new Expertise("Marine Reptiles")));
+    Expertise exp2 = expertiseRepository.findByNameIgnoreCase("Trauma").orElseGet(() -> expertiseRepository.save(new Expertise("Trauma")));
+    Expertise exp3 = expertiseRepository.findByNameIgnoreCase("Rehabilitation").orElseGet(() -> expertiseRepository.save(new Expertise("Rehabilitation")));
+
+    specialist.addExpertise(exp1);
+    specialist.addExpertise(exp2);
+    specialist.addExpertise(exp3);
+    specialistRepository.save(specialist);
+
+    Treatment t1 = new Treatment(animal, specialist, LocalDateTime.of(2026, 8, 18, 10, 0), TreatmentType.WOUND_CARE, "Cleaning of left front flipper");
+    Treatment t2 = new Treatment(animal, specialist, LocalDateTime.of(2026, 8, 18, 11, 0), TreatmentType.HYDRATION, "Subcutaneous fluid therapy");
+
+    treatmentRepository.save(t1);
+    treatmentRepository.save(t2);
+
+    List<Animal> resultReto = animalRepository.findAnimalsInStatusWithSpecialistExpertise(
+        RescueStatus.IN_REHABILITATION,
+        "Trauma"
+    );
+
+    assertThat(resultReto).isNotEmpty();
+    assertThat(resultReto).extracting(Animal::getAnimalCode).contains("AN-2026-100");
+}
 
     
 }
