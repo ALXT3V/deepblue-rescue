@@ -19,5 +19,5 @@ public interface SpecialistRepository extends JpaRepository<Specialist, Long> {
           AND s.active = true
         ORDER BY s.lastName ASC, s.firstName ASC
         """)
-    List<Specialist> findActiveByExpertise(@Param("expertiseName") String expertiseName);
+    List<Specialist> findActiveByExpertiseName(@Param("expertiseName") String expertiseName);
 }

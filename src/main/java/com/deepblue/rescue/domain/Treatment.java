@@ -111,4 +111,9 @@ public class Treatment {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    public void setType(String string) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setType'");
+    }
 }
