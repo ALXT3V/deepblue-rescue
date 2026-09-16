@@ -52,6 +52,16 @@ private List<Treatment> treatments;
         fetch=FetchType.LAZY
     )  
     private MedicalRecord medicalRecord;
+    @Column(name = "tracking_device_code", length = 50, unique = true)
+    private String trackingDeviceCode;
+
+    public String getTrackingDeviceCode() {
+        return trackingDeviceCode;
+    }
+
+    public void setTrackingDeviceCode(String trackingDeviceCode) {
+        this.trackingDeviceCode = trackingDeviceCode;
+    }
     
     public void assignMedicalRecord(MedicalRecord medicalRecord){
         if (medicalRecord ==null){
