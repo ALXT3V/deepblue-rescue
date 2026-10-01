@@ -10,8 +10,10 @@ import java.util.List;
 
 public interface TreatmentRepository extends JpaRepository<Treatment, Long> {
 
-    List<Treatment> findByAnimalIdOrderByPerformedAtAsc(String animalCode);
 
+    List<Treatment> findByAnimalIdOrderByPerformedAtAsc(Long animalCode);
+    List<Treatment> findByAnimalAnimalCodeOrderByPerformedAtAsc(String animalCode);
+    
     @Query("""
         SELECT t
         FROM Treatment t
