@@ -219,4 +219,151 @@ class TreatmentServiceImplTest {
 
         verifyNoInteractions(mapper);
     }
+
+    @Test
+    void shouldRegisterTreatmentSuccessfully_IntegrativeChallenge() {
+        RescueCase rescueCase = new RescueCase();
+        rescueCase.setCaseCode("RES-2026-100");
+        rescueCase.setRescueDate(LocalDate.of(2026, 8, 20));
+        rescueCase.setStatus(RescueStatus.IN_REHABILITATION);
+
+        Animal animal = new Animal();
+        animal.setAnimalCode("AN-2026-100");
+        animal.setCommonName("Green Sea Turtle");
+        animal.setRescueCase(rescueCase);
+
+        Specialist specialist = new Specialist();
+        specialist.setProfessionalCode("SPEC-001");
+        specialist.setFirstName("Elena");
+        specialist.setLastName("Vargas");
+        specialist.setActive(true);
+
+        LocalDateTime performedAt = LocalDateTime.of(2026, 8, 21, 9, 0);
+        CreateTreatmentRequest request = new CreateTreatmentRequest(
+                "AN-2026-100",
+                "SPEC-001",
+                performedAt,
+                TreatmentType.WOUND_CARE,
+                "Cleaning injury."
+        );
+
+        Treatment savedTreatment = new Treatment();
+        TreatmentResponse expectedResponse = new TreatmentResponse(
+                1L,
+                "AN-2026-100",
+                "SPEC-001",
+                performedAt,
+                TreatmentType.WOUND_CARE,
+                "Cleaning injury."
+        );
+
+        when(animalRepository.findByAnimalCode("AN-2026-100")).thenReturn(Optional.of(animal));
+        when(specialistRepository.findByProfessionalCode("SPEC-001")).thenReturn(Optional.of(specialist));
+        when(treatmentRepository.save(any(Treatment.class))).thenReturn(savedTreatment);
+        when(mapper.toResponse(savedTreatment)).thenReturn(expectedResponse);
+
+        TreatmentResponse result = service.register(request);
+
+        assertThat(result).isNotNull();
+        assertThat(result.animalCode()).isEqualTo("AN-2026-100");
+        verify(treatmentRepository).save(any(Treatment.class));
+    }
+
+    @Test
+    void shouldFailWhenTreatmentDateIsBeforeRescueDate_IntegrativeChallenge() {
+        RescueCase rescueCase = new RescueCase();
+        rescueCase.setRescueDate(LocalDate.of(2026, 8, 20));
+        rescueCase.setStatus(RescueStatus.IN_REHABILITATION);
+
+        Animal animal = new Animal();
+        animal.setAnimalCode("AN-2026-100");
+        animal.setRescueCase(rescueCase);
+
+        Specialist specialist = new Specialist();
+        specialist.setProfessionalCode("SPEC-001");
+        specialist.setActive(true);
+
+        LocalDateTime performedAt = LocalDateTime.of(2026, 8, 15, 9, 0);
+        CreateTreatmentRequest request = new CreateTreatmentRequest(
+                "AN-2026-100",
+                "SPEC-001",
+                performedAt,
+                TreatmentType.WOUND_CARE,
+                "Cleaning  injury."
+        );
+
+        when(animalRepository.findByAnimalCode("AN-2026-100")).thenReturn(Optional.of(animal));
+        when(specialistRepository.findByProfessionalCode("SPEC-001")).thenReturn(Optional.of(specialist));
+
+        assertThatThrownBy(() -> service.register(request))
+                .isInstanceOf(BusinessRuleException.class);
+
+        verify(treatmentRepository, never()).save(any());
+        verifyNoInteractions(mapper);
+    }
+    void shouldFailWhenRescueCaseIsReleased_IntegrativeChallenge() {
+        RescueCase rescueCase = new RescueCase();
+        rescueCase.setRescueDate(LocalDate.of(2026, 8, 20));
+        rescueCase.setStatus(RescueStatus.RELEASED);
+
+        Animal animal = new Animal();
+        animal.setAnimalCode("AN-2026-100");
+        animal.setRescueCase(rescueCase);
+
+        Specialist specialist = new Specialist();
+        specialist.setProfessionalCode("SPEC-001");
+        specialist.setActive(true);
+
+        CreateTreatmentRequest request = new CreateTreatmentRequest(
+                "AN-2026-100",
+                "SPEC-001",
+                LocalDateTime.of(2026, 8, 21, 9, 0),
+                TreatmentType.OBSERVATION,
+                "Regular status observation."
+        );
+
+        when(animalRepository.findByAnimalCode("AN-2026-100")).thenReturn(Optional.of(animal));
+        when(specialistRepository.findByProfessionalCode("SPEC-001")).thenReturn(Optional.of(specialist));
+
+        assertThatThrownBy(() -> service.register(request))
+                .isInstanceOf(BusinessRuleException.class);
+
+        verify(treatmentRepository, never()).save(any());
+        verifyNoInteractions(mapper);
+    }
+
+    @Test
+    void shouldFailWhenSpecialistIsInactive_IntegrativeChallenge() {
+        RescueCase rescueCase = new RescueCase();
+        rescueCase.setRescueDate(LocalDate.of(2026, 8, 20));
+        rescueCase.setStatus(RescueStatus.IN_REHABILITATION);
+
+        Animal animal = new Animal();
+        animal.setAnimalCode("AN-2026-100");
+        animal.setRescueCase(rescueCase);
+
+        Specialist specialist = new Specialist();
+        specialist.setProfessionalCode("SPEC-001");
+        specialist.setActive(false);
+
+        CreateTreatmentRequest request = new CreateTreatmentRequest(
+                "AN-2026-100",
+                "SPEC-001",
+                LocalDateTime.of(2026, 8, 21, 9, 0),
+                TreatmentType.WOUND_CARE,
+                "Cleaning of left front flipper injury."
+        );
+
+        when(animalRepository.findByAnimalCode("AN-2026-100")).thenReturn(Optional.of(animal));
+        when(specialistRepository.findByProfessionalCode("SPEC-001")).thenReturn(Optional.of(specialist));
+
+        assertThatThrownBy(() -> service.register(request))
+                .isInstanceOf(BusinessRuleException.class);
+
+        verify(treatmentRepository, never()).save(any());
+        verifyNoInteractions(mapper);
+    }
+
+
+
 }
