@@ -1,4 +1,5 @@
 package com.deepblue.rescue.domain;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -15,6 +16,7 @@ import jakarta.persistence.CascadeType;
 
 import java.time.LocalDate;
 import java.util.Objects;
+
 @Entity
 @Table(name = "rescue_cases")
 public class RescueCase {
@@ -26,38 +28,35 @@ public class RescueCase {
     @Column(name = "case_code", nullable = false, unique = true, length = 50)
     private String caseCode;
 
-    @Column(name = "rescue_date", nullable = false)
-    private LocalDate rescueDate;
+  @Column(name = "rescue_date", nullable = true)
+private LocalDate rescueDate;
 
-    @Column(name = "rescue_location", nullable = false, length = 300)
-    private String rescueLocation;
+@Column(name = "rescue_location", nullable = true, length = 300)
+private String rescueLocation;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 30)
-    private RescueStatus status;
+@Enumerated(EnumType.STRING)
+@Column(name = "status", nullable = true, length = 30)
+private RescueStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rescue_center_id", nullable = false)
-    private RescueCenter rescueCenter;
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "rescue_center_id", nullable = true)
+private RescueCenter rescueCenter;
 
     @OneToOne(
         mappedBy = "rescueCase",
         cascade = CascadeType.ALL,
         orphanRemoval = true,
-        fetch=FetchType.LAZY
+        fetch = FetchType.LAZY
     )
     private Animal animal;
     
-    public void assignAnimal(Animal animal){
-        if (animal != null){
-            if (this.animal != null){
-                this.animal.setRescueCase(null);
-            }
-        }else{
+    public void assignAnimal(Animal animal) {
+        if (animal != null) {
             animal.setRescueCase(this);
+        } else if (this.animal != null) {
+            this.animal.setRescueCase(null);
         }
-        this.animal=animal;
-
+        this.animal = animal;
     }
 
     public RescueCase() {
@@ -123,9 +122,8 @@ public class RescueCase {
     }
 
     public void setAnimal(Animal animal) {
-        this.animal = animal;
+        assignAnimal(animal);
     }
-
 
     @Override
     public boolean equals(Object o) {

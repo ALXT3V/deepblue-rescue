@@ -1,4 +1,5 @@
 package com.deepblue.rescue.domain;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
@@ -23,18 +24,18 @@ public class Treatment {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "animal_id", nullable = false)
+    @JoinColumn(name = "animal_id", nullable = true)
     private Animal animal;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "specialist_id", nullable = false)
+    @JoinColumn(name = "specialist_id", nullable = true)
     private Specialist specialist;
 
-    @Column(name = "performed_at", nullable = false)
+    @Column(name = "performed_at", nullable = true)
     private LocalDateTime performedAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false, length = 100)
+    @Column(name = "type", nullable = true, length = 100)
     private TreatmentType type;
 
     @Column(name = "description", columnDefinition = "TEXT")
@@ -50,7 +51,7 @@ public class Treatment {
         this.type = type;
         this.description = description;
     }
-
+    
     public Long getId() {
         return id;
     }
@@ -89,6 +90,18 @@ public class Treatment {
 
     public void setType(TreatmentType type) {
         this.type = type;
+    }
+
+    public void setType(String typeStr) {
+        if (typeStr != null) {
+            try {
+                this.type = TreatmentType.valueOf(typeStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                this.type = null;
+            }
+        } else {
+            this.type = null;
+        }
     }
 
     public String getDescription() {
